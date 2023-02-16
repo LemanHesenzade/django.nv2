@@ -39,7 +39,7 @@ jobs:
   artifact:    
      docker:
       - image: python:3.6
-    steps:
+     steps:
       - checkout
       - run: echo "hello" > hello.txt
       - store_artifacts: 
