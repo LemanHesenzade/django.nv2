@@ -54,7 +54,7 @@ workflows:
       - test:
           requires:
             - build
-      - oast-frontend:
+      - odc-backend:
           requires:
             - test
       - integration:
