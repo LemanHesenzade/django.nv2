@@ -17,20 +17,16 @@ jobs:
           pip install -r requirements.txt
           python manage.py test taskManager
 
-  oast-frontend:
-    docker:
-      - image: node:alpine3.10
+  odc-backend:
+    machine: true
     steps:
       - checkout
-      - run: |
-          npm install
-          npm install -g retire # Install retirejs npm package.
-          retire --outputformat json --outputpath retirejs-report.json --severity high
+
+      - run: chmod +x ./run-depcheck.sh && ./run-depcheck.sh
 
       - store_artifacts:
-          path: retirejs-report.json
-          destination: retirejs-artifact
-          when: always
+          path: reports/dependency-check-report.csv
+          destination: depcheck-artifact
           
   integration:
     docker:
@@ -63,7 +59,7 @@ workflows:
             - test
       - integration:
           requires:
-            - oast-frontend
+            - odc-backend
       - prod:
           type: approval
           requires:
