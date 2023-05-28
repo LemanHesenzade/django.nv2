@@ -1,35 +1,37 @@
 jobs:
   build:
-    executor: node/default # use the default executor defined within the orb
+    docker:
+      - image: python:3.6                   # similar to "image" in GitLab
     steps:
       - checkout
-      - node/install-packages:
-          pkg-manager: npm
-      - run:
-          command: npm run test
-          name: Run tests
-      - run:
-          command: npm run build
-          name: Build app
-      - persist_to_workspace:
-          root: ~/django.nv2
-          paths:
-            - .
+      - run: |                              # similar to "script" in GitLab
+          pip install -r requirements.txt
+          python manage.py check
 
+  test:
+    docker:
+      - image: python:3.6
+    steps:
+      - checkout
+      - run: |
+          pip install -r requirements.txt
+          python manage.py test taskManager
 
   oast-frontend:
-    machine: true
+    docker:
+      - image: python:3.6
     steps:
       - checkout
-
-      - run:
-          command: docker run --rm -v $(pwd):/src -w /src hysnsec/retire --outputformat json --outputpath retirejs-output.json --severity high || true
+      - run: |
+          npm install
+          npm install -g retire # Install retirejs npm package.
+          retire --outputformat json --outputpath retirejs-report.json --severity high
 
       - store_artifacts:
-          path: retirejs-output.json
+          path: retirejs-report.json
           destination: retirejs-artifact
           when: always
-
+          
   integration:
     docker:
       - image: python:3.6
@@ -53,9 +55,12 @@ workflows:
   django:
     jobs:
       - build
-      - oast-frontend:
+      - test:
           requires:
             - build
+      - oast-frontend:
+          requires:
+            - test
       - integration:
           requires:
             - oast-frontend
