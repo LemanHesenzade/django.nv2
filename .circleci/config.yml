@@ -19,7 +19,7 @@ jobs:
 
   oast-frontend:
     docker:
-      - image: python:3.6
+      - image: node:alpine3.10
     steps:
       - checkout
       - run: |
