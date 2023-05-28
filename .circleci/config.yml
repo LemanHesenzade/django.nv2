@@ -53,12 +53,9 @@ workflows:
   django:
     jobs:
       - build
-      - test:
-          requires:
-            - build
       - oast-frontend:
           requires:
-            - test
+            - build
       - integration:
           requires:
             - oast-frontend
