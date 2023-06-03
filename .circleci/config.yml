@@ -55,12 +55,12 @@ workflows:
       - test:
           requires:
             - build
-      - zap_baseline:
+      - nuclei:
           requires:
             - test
       - integration:
           requires:
-            - zap_baseline
+            - nuclei
       - prod:
           type: approval
           requires:
