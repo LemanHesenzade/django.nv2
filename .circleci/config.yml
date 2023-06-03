@@ -27,6 +27,7 @@ jobs:
       - store_artifacts:
           path: bandit-output.json
           destination: bandit-artifact
+          when: always
           
   integration:
     docker:
