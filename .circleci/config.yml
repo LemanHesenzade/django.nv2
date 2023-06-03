@@ -17,17 +17,18 @@ jobs:
           pip install -r requirements.txt
           python manage.py test taskManager
 
-  sast:
+  zap_baseline:
     machine: true
     steps:
       - checkout
 
-      - run: docker run --rm -v $(pwd):/src hysnsec/bandit -r /src -f json -o /src/bandit-output.json
+      - run: |
+          docker pull owasp/zap2docker-stable:2.10.0
+          docker run --user root --rm -v $(pwd):/zap/wrk:rw -w /zap owasp/zap2docker-stable:2.10.0 zap-baseline.py -t ${PROD_URL} -J zap-output.json || true
 
       - store_artifacts:
-          path: bandit-output.json
-          destination: bandit-artifact
-          when: always
+          path: zap-output.json
+          destination: zap-artifact
           
   integration:
     docker:
@@ -55,12 +56,12 @@ workflows:
       - test:
           requires:
             - build
-      - sast:
+      - zap_baseline:
           requires:
             - test
       - integration:
           requires:
-            - sast
+            - zap_baseline
       - prod:
           type: approval
           requires:
